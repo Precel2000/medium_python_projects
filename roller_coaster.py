@@ -5,10 +5,6 @@ import matplotlib.pyplot as plt
 # load rankings data
 wood_winners = pd.read_csv('Golden_Ticket_Award_Winners_Wood.csv')
 steel_winners = pd.read_csv('Golden_Ticket_Award_Winners_Steel.csv')
-#print("wood winners: ")
-#print(wood_winners.head())
-#print("steel winners: ")
-#print(steel_winners.head())
 
 # function to plot rankings over time for 1 roller coaster
 def rank_history(name, park):
@@ -46,7 +42,7 @@ def rank_history(name, park):
 #rank_history('El Toro', 'Six Flags Great Adventure')    
 plt.clf()
 
-# write function to plot rankings over time for 2 roller coasters in the same ranking here:
+# function to plot rankings over time for 2 roller coasters in the same ranking
 def rank_hist_2(name1, park1, name2, park2, ranking):
 
     #select data corresponding to the query
@@ -89,7 +85,6 @@ def rank_hist_2(name1, park1, name2, park2, ranking):
     plt.show()
 
 #rank_hist_2('El Toro', 'Six Flags Great Adventure', 'Boulder Dash' ,'Lake Compounce', wood_winners)
-
 plt.clf()
 
 # function to plot top n rankings over time
@@ -123,14 +118,12 @@ def rank_hist_n (n, ranking):
     plt.show()
 
 #rank_hist_n(2, steel_winners)
-
 plt.clf()
 
 # load roller coaster data
 ro_co_cap = pd.read_csv('roller_coasters.csv')
-#print (ro_co_cap.head())
 
-# function to plot histogram of column values here:
+# function to plot histogram of a column's values
 def histogram (column):
     #the height column contains outliers, which are eliminated here
     if column != 'height':
@@ -175,4 +168,43 @@ def inv_num (park):
 
 #inv_num('Walibi Belgium')
 
+plt.clf()
+
+#function to plot pie chart of operating status
+def open_stat(df):
+    #select desired data
+    operating_df = df[df['status']=='status.operating']
+    closed_df = df[df['status'] == 'status.closed.definitely']
+    #count number of operating and permanently closed coasters
+    operating = len(operating_df)
+    closed = len(closed_df)
+    count = [operating, closed]
+    #these will become the chart's labels
+    labels = ['Operating', 'Closed definitely']
+
+    #create graph
+    plt.figure()
+    plt.pie(count, labels = labels, autopct='%0.1f%%')
+    #improve visials
+    plt.axis('equal')
+    plt.title('operating status of coasters')
+    plt.show()
+    
+#open_stat(ro_co_cap)
+plt.clf()
+
+#function to create scatter plot of any two numeric columns
+def scatter(col1, col2):
+    #get the data from the input columns
+    values1 = ro_co_cap[col1]
+    values2 = ro_co_cap[col2]
+
+    plt.figure(figsize=(10, 8))
+    plt.scatter(values1, values2, c='purple', marker='*')
+    plt.title(col1 + ' as related to ' + col2 + " of coasters")
+    plt.xlabel(col1)
+    plt.ylabel(col2)
+    plt.show()
+
+#scatter('speed', 'length')
 plt.clf()
