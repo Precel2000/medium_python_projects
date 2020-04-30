@@ -150,3 +150,29 @@ def histogram (column):
 
 #histogram('height')
 plt.clf()
+
+# function to plot inversions by coaster at a park
+def inv_num (park):
+    #select all coasters in the queried park
+    coasters = ro_co_cap[ro_co_cap['park'] == park]
+    inversions = coasters['num_inversions']
+    names = coasters['name'].tolist()
+
+    #we specify the size of the figure as we want it bigger than the default
+    plt.figure(figsize=(15,10))
+    #plot the bar chart
+    plt.bar(range(len(names)), inversions)
+    
+    #customize the chart, improve readability
+    ax=plt.subplot()
+    ax.set_xticks(range(len(names)))
+    ax.set_xticklabels(names, rotation=40)
+    #label the graph
+    ax.set_title('Inversions per coaster in ' + park)
+    plt.xlabel('Coaster Name')
+    plt.ylabel("Number of Inversions")
+    plt.show()
+
+#inv_num('Walibi Belgium')
+
+plt.clf()
