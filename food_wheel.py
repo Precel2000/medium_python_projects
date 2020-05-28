@@ -45,5 +45,14 @@ ax.set_xticklabels(['April', 'May', 'June', 'July', 'August', 'September'])
 plt.ylabel('Average Order Amount')
 plt.title('Order Amount over Time')
 
+#get amount spent per customer
+customer_amount =  orders.groupby("customer_id").price.sum().reset_index()
+#plot the histogram
+plt.hist(customer_amount.price.values, 40, (0,200))
+#improve graph readability (title, label axis)
+plt.title("Distribution of money spent per customer")
+plt.ylabel("Number of Customers")
+plt.xlabel("Total Spent")
+
 #render the visualisation
 plt.show()
