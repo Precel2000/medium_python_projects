@@ -70,6 +70,7 @@ class Vehicle(pygame.sprite.Sprite):
         self.x = x[direction][lane]                 # current x-coordinate of the vehicle
         self.y = y[direction][lane]                 # current y-coordinate of the vehicle
         self.crossed = 0      # has it crossed the intersection, defaults to 0
+        vehicles[direction][lane].append(self)
         self.index = len(vehicles[direction][lane]) - 1     # relative position of the vehicle among the vehicles moving in the same direction and the same lane
         path = "images/" + direction + "/" + vehicleClass + ".png"
         self.image = pygame.image.load(path)        # image to be rendered
@@ -99,7 +100,7 @@ class Vehicle(pygame.sprite.Sprite):
         # if no other vehicles present set value of stop to the default one
         else:
             self.stop = defaultStop[direction]
-            
+         # new starting and stopping coordinates   
         if(direction=='right'):
             temp = self.image.get_rect().width + stoppingGap    
             x[direction][lane] -= temp
@@ -174,16 +175,18 @@ class Vehicle(pygame.sprite.Sprite):
             + movingGap))):                
                 self.y -= self.speed
 
-# updates the timers of all signals
-def updateValues():
-    for i in range(0, noOfSignals):
-        if(i==currentGreen):
-            if(currentYellow==0):
-                signals[i].green-=1
-            else:
-                signals[i].yellow-=1
-        else:
-            signals[i].red-=1
+# initialise the trafficSignal objects, clockise stating from top left 
+def initialize():
+    ts1 = TrafficSignal(0, defaultYellow, defaultGreen[0])
+    signals.append(ts1)
+    ts2 = TrafficSignal(ts1.yellow+ts1.green, defaultYellow, defaultGreen[1])
+    signals.append(ts2)
+    ts3 = TrafficSignal(defaultRed, defaultYellow, defaultGreen[2])
+    signals.append(ts3)
+    ts4 = TrafficSignal(defaultRed, defaultYellow, defaultGreen[3])
+    signals.append(ts4)
+    repeat()
+
 
 # this runs the simulation
 def repeat():
@@ -211,21 +214,22 @@ def repeat():
     currentGreen = nextGreen 
     nextGreen = (currentGreen+1)%noOfSignals
     signals[nextGreen].red = signals[currentGreen].yellow+signals[currentGreen].green
+    # call self recursively
     repeat()
 
 
+# updates the timers of all signals
+def updateValues():
+    for i in range(0, noOfSignals):
+        if(i==currentGreen):
+            if(currentYellow==0):
+                signals[i].green-=1
+            else:
+                signals[i].yellow-=1
+        else:
+            signals[i].red-=1
 
-# initialise the trafficSignal objects, clockise stating from top left 
-def initialize():
-    ts1 = TrafficSignal(0, defaultYellow, defaultGreen[0])
-    signals.append(ts1)
-    ts2 = TrafficSignal(ts1.yellow+ts1.green, defaultYellow, defaultGreen[1])
-    signals.append(ts2)
-    ts3 = TrafficSignal(defaultRed, defaultYellow, defaultGreen[2])
-    signals.append(ts3)
-    ts4 = TrafficSignal(defaultRed, defaultYellow, defaultGreen[3])
-    signals.append(ts4)
-    repeat()
+
 
 # method to initialise vehicles, type of vehicle, lane and direction are random
 def generateVehicles():
@@ -270,13 +274,40 @@ class Main:
     greenSignal = pygame.image.load('images/signals/green.png')
     font = pygame.font.Font(None, 30)
 
+    # create thread to initialise vehicles
+    thread2 =   threading.Thread(name="generateVehicles",target=generateVehicles, args=())
+    thread2.daemon = True
+    thread2.start()
 
+    # infinite loop so our simulation goes on forever
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
 
-
-
-
-
-
-
+        screen.blit(background,(0,0))   
+        for i in range(0,noOfSignals):
+            if(i==currentGreen):
+                if(currentYellow==1):
+                    signals[i].signalText = signals[i].yellow
+                    screen.blit(yellowSignal, signalCoods[i])
+                else:
+                    signals[i].signalText = signals[i].green
+                    screen.blit(greenSignal, signalCoods[i])
+            else:
+                if(signals[i].red<=10):
+                    signals[i].signalText = signals[i].red
+                else:
+                    signals[i].signalText = "---"
+                screen.blit(redSignal, signalCoods[i])
+        signalTexts = ["","","",""]
+        for i in range(0,noOfSignals):  
+            signalTexts[i] = font.render(str(signals[i].signalText), True, white, black)
+            screen.blit(signalTexts[i],signalTimerCoods[i])
+        
+        for vehicle in simulation:  
+            screen.blit(vehicle.image, [vehicle.x, vehicle.y])
+            vehicle.move()
+        pygame.display.update()
 
 Main()
